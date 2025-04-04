@@ -1,12 +1,12 @@
-# Checkmk extension for ...
+# Checkmk extension for Unbound
 
-![build](https://github.com/jiuka/checkmk_template/workflows/build/badge.svg)
-![flake8](https://github.com/jiuka/checkmk_template/workflows/Lint/badge.svg)
-![pytest](https://github.com/jiuka/checkmk_template/workflows/pytest/badge.svg)
+![build](https://github.com/scsitteam/checkmk_unbound/workflows/build/badge.svg)
+![flake8](https://github.com/scsitteam/checkmk_unbound/workflows/Lint/badge.svg)
+![pytest](https://github.com/scsitteam/checkmk_unbound/workflows/pytest/badge.svg)
 
 ## Description
 
-This is a template to develop Checkmk Extensions
+Checkls the status of unbound. Based on work by [PLUTEX](https://exchange.checkmk.com/u/PLUTEX).
 
 ## Development
 
