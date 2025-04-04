@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (C) 2022, Jan-Philipp Litza (PLUTEX) <jpl@plutex.de>.
+# Copyright (C) 2025, Marius Rieder <marius.rieder@scs.ch>.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,20 +24,18 @@ from typing import (
     Union,
 )
 
-from .agent_based_api.v1.type_defs import (
+from cmk.agent_based.v2 import (
+    AgentSection,
+    check_levels,
+    CheckPlugin,
     CheckResult,
     DiscoveryResult,
-    StringTable,
-)
-
-from .agent_based_api.v1 import (
-    check_levels,
-    register,
-    render,
-    get_value_store,
     get_rate,
-    Service,
+    get_value_store,
     GetRateError,
+    render,
+    Service,
+    StringTable,
 )
 
 
@@ -57,7 +56,7 @@ def parse_unbound(string_table: StringTable) -> UnboundSection:
     return section
 
 
-register.agent_section(
+agent_section_unbound = AgentSection(
     name="unbound",
     parse_function=parse_unbound,
 )
@@ -122,7 +121,7 @@ def check_unbound_cache(
     )
 
 
-register.check_plugin(
+check_plugin_unbound_cache = CheckPlugin(
     name="unbound_cache",
     service_name="Unbound Cache",
     sections=["unbound"],
@@ -183,15 +182,15 @@ def check_unbound_answers(params: Mapping, section: UnboundSection) -> CheckResu
             )
 
 
-register.check_plugin(
+check_plugin_unbound_answers = CheckPlugin(
     name="unbound_answers",
     service_name="Unbound Answers",
     sections=["unbound"],
     discovery_function=discover_unbound_answers,
     check_function=check_unbound_answers,
     check_default_parameters={
-        'levels_upper_SERVFAIL': (10, 100),
-        'levels_upper_REFUSED': (10, 100),
+        'levels_upper_SERVFAIL': ('fixed', (10, 100)),
+        'levels_upper_REFUSED': ('fixed', (10, 100)),
     },
     check_ruleset_name="unbound_answers",
 )
@@ -216,14 +215,14 @@ def check_unbound_unwanted_replies(section: UnboundSection) -> CheckResult:
 
     yield from check_levels(
         value=rate,
-        levels_upper=(10, 100),
+        levels_upper=('fixed', (10, 100)),
         metric_name='unbound_unwanted_replies',
         render_func=render_qps,
         label='Unwanted Replies',
     )
 
 
-register.check_plugin(
+check_plugin_unbound_unwanted_replies = CheckPlugin(
     name="unbound_unwanted_replies",
     service_name="Unbound Unwanted Replies",
     sections=["unbound"],

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2022, Jan-Philipp Litza (PLUTEX) <jpl@plutex.de>.
+# Copyright (C) 2025, Marius Rieder <marius.rieder@scs.ch>.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,88 +18,74 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from cmk.gui.i18n import _
-from cmk.gui.plugins.wato.utils import (
-    CheckParameterRulespecWithoutItem,
-    rulespec_registry,
-    RulespecGroupCheckParametersApplications,
+from cmk.rulesets.v1 import Title
+from cmk.rulesets.v1.form_specs import (
+    DefaultValue,
+    DictElement,
+    Dictionary,
+    InputHint,
+    SimpleLevels,
+    LevelDirection,
+    Percentage,
+    LevelsType,
+    Integer,
+    migrate_to_float_simple_levels,
+    migrate_to_lower_float_levels,
 )
-from cmk.gui.valuespec import Dictionary, Float, Percentage, Tuple, Alternative
+from cmk.rulesets.v1.rule_specs import Topic, CheckParameters, HostCondition
 
 
-def _parameter_valuespec_unbound_cache():
+def _parameter_form_unbound_cache():
     return Dictionary(
-        title=_("Unbound: Cache"),
-        elements=[
-            (
-                "cache_misses",
-                Tuple(
-                    title="Levels on cache misses per second",
-                    elements=[
-                        Float(
-                            title="warn",
-                        ),
-                        Float(
-                            title="crit",
-                        ),
-                    ],
+        elements={
+            'cache_misses': DictElement(
+                parameter_form=SimpleLevels(
+                    title=Title('Levels on cache misses per second'),
+                    level_direction=LevelDirection.UPPER,
+                    form_spec_template=Integer(),
+                    prefill_levels_type=DefaultValue(LevelsType.NONE),
+                    prefill_fixed_levels=InputHint(value=(100, 200)),
+                    migrate=migrate_to_float_simple_levels,
                 ),
+                required=False,
             ),
-            (
-                "cache_hits",
-                Tuple(
-                    title="Lower levels for hits in %",
-                    elements=[
-                        Percentage(
-                            title="warn",
-                        ),
-                        Percentage(
-                            title="crit",
-                        ),
-                    ],
+            'cache_hits': DictElement(
+                parameter_form=SimpleLevels(
+                    title=Title('Lower levels for hits in %'),
+                    level_direction=LevelDirection.LOWER,
+                    form_spec_template=Percentage(),
+                    prefill_levels_type=DefaultValue(LevelsType.NONE),
+                    prefill_fixed_levels=InputHint(value=(75, 50)),
+                    migrate=migrate_to_lower_float_levels,
                 ),
+                required=False,
             ),
-        ],
+        },
     )
 
 
-rulespec_registry.register(
-    CheckParameterRulespecWithoutItem(
-        check_group_name="unbound_cache",
-        group=RulespecGroupCheckParametersApplications,
-        match_type="dict",
-        parameter_valuespec=_parameter_valuespec_unbound_cache,
-        title=lambda: _("Unbound Cache"),
-    )
+rule_spec_unbound_cache = CheckParameters(
+    name='unbound_cache',
+    title=Title('Unbound Cache'),
+    topic=Topic.APPLICATIONS,
+    parameter_form=_parameter_form_unbound_cache,
+    condition=HostCondition(),
 )
 
 
-def _parameter_valuespec_unbound_answers():
+def _parameter_form_unbound_answers():
     return Dictionary(
-        elements=[
-            (
-                f"levels_upper_{answer}",
-                Alternative(
-                    title=f'Upper levels for {answer} answers',
-                    show_alternative_title=True,
-                    elements=[
-                        Tuple(
-                            elements=[
-                                Float(title=_("Warning at"), unit=_("qps")),
-                                Float(title=_("Critical at"), unit=_("qps")),
-                            ],
-                            title=f'Upper levels for rate of {answer} answers',
-                        ),
-                        Tuple(
-                            elements=[
-                                Percentage(title=_("Warning at")),
-                                Percentage(title=_("Critical at")),
-                                FixedValue(value="%", totext=""),
-                            ],
-                            title=f'Upper levels for ratio of {answer} answers',
-                        ),
-                    ]
-                )
+        elements={
+            f"levels_upper_{answer}": DictElement(
+                parameter_form=SimpleLevels(
+                    title=Title(f'Upper levels for {answer} answers'),
+                    level_direction=LevelDirection.UPPER,
+                    form_spec_template=Integer(unit_symbol='q/s'),
+                    prefill_levels_type=DefaultValue(LevelsType.NONE),
+                    prefill_fixed_levels=InputHint(value=(100, 1000)),
+                    migrate=migrate_to_float_simple_levels,
+                ),
+                required=False,
             )
             for answer in (
                 'NOERROR',
@@ -109,16 +96,14 @@ def _parameter_valuespec_unbound_answers():
                 'REFUSED',
                 'nodata',
             )
-        ],
+        },
     )
 
 
-rulespec_registry.register(
-    CheckParameterRulespecWithoutItem(
-        check_group_name="unbound_answers",
-        group=RulespecGroupCheckParametersApplications,
-        match_type="dict",
-        parameter_valuespec=_parameter_valuespec_unbound_answers,
-        title=lambda: _("Unbound Answers"),
-    )
+rule_spec_unbound_answers = CheckParameters(
+    name='unbound_answers',
+    title=Title('Unbound Answers'),
+    topic=Topic.APPLICATIONS,
+    parameter_form=_parameter_form_unbound_answers,
+    condition=HostCondition(),
 )

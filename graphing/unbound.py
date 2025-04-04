@@ -2,6 +2,7 @@
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 
 # Copyright (C) 2022, Jan-Philipp Litza (PLUTEX) <jpl@plutex.de>.
+# Copyright (C) 2025, Marius Rieder <marius.rieder@scs.ch>.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,72 +18,85 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from cmk.gui.i18n import _
+from cmk.graphing.v1 import graphs, metrics, Title
 
-from cmk.gui.plugins.metrics import (
-    metric_info,
-    graph_info,
+metric_unbound_answers_NOERROR = metrics.Metric(
+    name='unbound_answers_NOERROR',
+    title=Title('Rate of NOERROR answers'),
+    unit=metrics.Unit(metrics.DecimalNotation("1/s"), metrics.StrictPrecision(2)),
+    color=metrics.Color.GREEN,
 )
 
-metric_info['unbound_answers_NOERROR'] = {
-    'title': _('Rate of NOERROR answers'),
-    'unit': '1/s',
-    'color': '31/a',
-}
+metric_unbound_answers_FORMERR = metrics.Metric(
+    name='unbound_answers_FORMERR',
+    title=Title('Rate of FORMERR answers'),
+    unit=metrics.Unit(metrics.DecimalNotation("1/s"), metrics.StrictPrecision(2)),
+    color=metrics.Color.DARK_YELLOW,
+)
 
-metric_info['unbound_answers_FORMERR'] = {
-    'title': _('Rate of FORMERR answers'),
-    'unit': '1/s',
-    'color': '21/a',
-}
+metric_unbound_answers_SERVFAIL = metrics.Metric(
+    name='unbound_answers_SERVFAIL',
+    title=Title('Rate of SERVFAIL answers'),
+    unit=metrics.Unit(metrics.DecimalNotation("1/s"), metrics.StrictPrecision(2)),
+    color=metrics.Color.DARK_PURPLE,
+)
 
-metric_info['unbound_answers_SERVFAIL'] = {
-    'title': _('Rate of SERVFAIL answers'),
-    'unit': '1/s',
-    'color': '11/a',
-}
+metric_unbound_answers_NXDOMAIN = metrics.Metric(
+    name='unbound_answers_NXDOMAIN',
+    title=Title('Rate of NXDOMAIN answers'),
+    unit=metrics.Unit(metrics.DecimalNotation("1/s"), metrics.StrictPrecision(2)),
+    color=metrics.Color.GRAY,
+)
 
-metric_info['unbound_answers_NXDOMAIN'] = {
-    'title': _('Rate of NXDOMAIN answers'),
-    'unit': '1/s',
-    'color': '51/a',
-}
+metric_unbound_answers_NOTIMPL = metrics.Metric(
+    name='unbound_answers_NOTIMPL',
+    title=Title('Rate of NOTIMPL answers'),
+    unit=metrics.Unit(metrics.DecimalNotation("1/s"), metrics.StrictPrecision(2)),
+    color=metrics.Color.DARK_BLUE,
+)
 
-metric_info['unbound_answers_NOTIMPL'] = {
-    'title': _('Rate of NOTIMPL answers'),
-    'unit': '1/s',
-    'color': '41/a',
-}
+metric_unbound_answers_REFUSED = metrics.Metric(
+    name='unbound_answers_REFUSED',
+    title=Title('Rate of REFUSED answers'),
+    unit=metrics.Unit(metrics.DecimalNotation("1/s"), metrics.StrictPrecision(2)),
+    color=metrics.Color.RED,
+)
 
-metric_info['unbound_answers_REFUSED'] = {
-    'title': _('Rate of REFUSED answers'),
-    'unit': '1/s',
-    'color': '26/a',
-}
+metric_unbound_answers_nodata = metrics.Metric(
+    name='unbound_answers_nodata',
+    title=Title('Rate of answers without data'),
+    unit=metrics.Unit(metrics.DecimalNotation("1/s"), metrics.StrictPrecision(2)),
+    color=metrics.Color.DARK_BROWN,
+)
 
-metric_info['unbound_answers_nodata'] = {
-    'title': _('Rate of answers without data'),
-    'unit': '1/s',
-    'color': '52/a',
-}
-
-
-graph_info['unbound_answers'] = {
-    'title': _('Rate of answers'),
-    'metrics': [
-        (f'unbound_answers_{answer}', 'line')
+graph_unbound_answers = graphs.Graph(
+    name='unbound_answers',
+    title=Title('Rate of answers'),
+    simple_lines=[
+        f'unbound_answers_{answer}'
         for answer in ('NOERROR', 'FORMERR', 'SERVFAIL', 'NXDOMAIN', 'NOTIMPL', 'REFUSED', 'nodata')
     ],
-}
+)
 
+metric_cache_hit_rate = metrics.Metric(
+    name='cache_hit_rate',
+    title=Title('Cache hits per second'),
+    unit=metrics.Unit(metrics.DecimalNotation("/s"), metrics.StrictPrecision(2)),
+    color=metrics.Color.GREEN,
+)
 
-metric_info['cache_hit_rate'] = {
-    'title': _('Cache hits per second'),
-    'unit': '1/s',
-    'color': '26/a',
-}
+metric_cache_misses_rate = metrics.Metric(
+    name='cache_misses_rate',
+    title=Title('Cache misses per second'),
+    unit=metrics.Unit(metrics.DecimalNotation("/s"), metrics.StrictPrecision(2)),
+    color=metrics.Color.RED,
+)
 
-graph_info['cache_hit_misses'] = {
-    'title': _('Cache Hits and Misses'),
-    'metrics': [('cache_hit_rate', 'line'), ('cache_misses_rate', 'line')],
-}
+graph_cache_hit_misses = graphs.Graph(
+    name='cache_hit_misses',
+    title=Title('Cache Hits and Misses'),
+    compound_lines=[
+        'cache_hit_rate',
+        'cache_misses_rate',
+    ],
+)
