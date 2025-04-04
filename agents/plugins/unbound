@@ -1,0 +1,4 @@
+#!/bin/sh
+echo '<<<unbound:sep(61)>>>'
+unbound-control stats_noreset
+echo '<<<>>>'
